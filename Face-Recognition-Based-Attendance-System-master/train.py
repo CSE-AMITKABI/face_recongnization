@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import *
 from tkinter import Message, Text
 import cv2
 import os
@@ -11,56 +12,50 @@ import datetime
 import time
 import tkinter.ttk as ttk
 import tkinter.font as font
+import glob
+
 
 window = tk.Tk()
 window.title("Smart Attendance System")
-window.attributes('-fullscreen', True)
-canvas = tk.Canvas(window, width = 1400, height = 715)  
+window.attributes('-fullscreen', True,)
+window.configure(background='black')
+canvas = tk.Canvas(window, width = 1430, height = 715)  
 canvas.pack()  
 img = ImageTk.PhotoImage(Image.open("1.jpg"))  
 canvas.create_image(0, 0, anchor='nw', image=img) 
 
 message = tk.Label(window, text="Face Recognition Based Smart Attendance System",
-                   fg="Blue", width=70, height=1, font=('times', 30, 'italic bold'))
+                   bg ='DodgerBlue4',fg="white", width=70, height=2, font=('times', 30, 'italic bold'))
 
-message.place(x=0, y=50)
-border = tk.Label(window, text="Welcome to Smart Attendance System   ||   NEW USER : Enter Your Details And Capture Your Picture then Press 'TRAIN IMAGE'   ||    EXISTING USER : Click on 'TRACK IMAGE' after tracking  Press 'Q'",
-                  width=172, height=1, bg='blue', fg="yellow")
+message.place(x=0, y=22)
+border = tk.Label(window, text="Welcome to Smart Attendance System :: NEW USER : Enter Your Details And Capture Pictures and Press 'TRAIN IMAGE' :: EXISTING USER : Click on 'TRACK IMAGE' after tracking Press 'Q'",
+                  width=170, height=1, bg='blue', fg="white",font=('Helvetica', 11, ' bold '),relief="raised")
 border.place(x=0, y=0)
-border = tk.Label(window, width=1000, height=3, bg='blue')
+border = tk.Label(window, width=1000, height=3, bg='blue',)
 border.place(x=0, y=715)
 lbl = tk.Label(window, text="Enter ID", width=20, height=2,
-               fg="White", bg="Blue", font=('times', 15, ' bold '))
+               fg="White", bg="Blue", font=('times', 15, ' bold '),relief="raised")
 lbl.place(x=300, y=200)
 
 txt = tk.Entry(window, width=20, bg="Blue", fg="white",
-               font=('times', 15, ' bold '))
+               font=('times', 15, ' bold '),relief="raised")
 txt.place(x=550, y=215)
 
 lbl2 = tk.Label(window, text="Enter Name", width=20, fg="white",
-                bg="Blue", height=2, font=('times', 15, ' bold '))
+                bg="Blue", height=2, font=('times', 15, ' bold '),relief="raised")
 lbl2.place(x=300, y=300)
 
 txt2 = tk.Entry(window, width=20, bg="Blue", fg="white",
-                font=('times', 15, ' bold '))
+                font=('times', 15, ' bold '),relief="raised")
 txt2.place(x=550, y=315)
 
 lbl3 = tk.Label(window, text="Notification : ", width=20,
-                fg="white", bg="Blue", height=2, font=('times', 15, ' bold'))
+                fg="white", bg="Blue", height=2, font=('times', 15, ' bold'),relief="raised")
 lbl3.place(x=300, y=400)
 
 message = tk.Label(window, text="", bg="Blue", fg="white", width=53,
-                   height=2, activebackground="Blue", font=('times', 15, ' bold '))
+                   height=2, activebackground="Blue", font=('times', 15, ' bold '),relief="raised")
 message.place(x=550, y=400)
-
-lbl3 = tk.Label(window, text="Attendance : ", width=20, fg="white",
-                bg="Blue", height=2, font=('times', 15, ' bold'))
-lbl3.place(x=400, y=580)
-
-message2 = tk.Label(window, text="", fg="white", bg="Blue",
-                    activeforeground="green", width=60, height=2, font=('times', 15, ' bold '))
-message2.place(x=620, y=580)
-
 
 def clear():
     txt.delete(0, 'end')
@@ -194,7 +189,8 @@ def TrackImages():
                 aa = df.loc[df['Id'] == Id]['Name'].values
                 tt = str(Id)+" - "+aa
                 attendance.loc[len(attendance)] = [Id, aa, date, timeStamp]
-                res=str(tt)+"    Your Present In Confirmed !"
+                res="Total " + str(faces.shape[0])+" Present Confirmed !"
+                
             else:
                 Id = 'Unknown'
                 tt = str(Id)
@@ -219,27 +215,116 @@ def TrackImages():
     cam.release()
     cv2.destroyAllWindows()
     # res=attendance
-    message2.configure(text=res)
+    message.configure(text=res)
 
+def Attendance() :
+    
+    root = Tk()
+    root.title("Attendance Sheet")
+    width = 320
+    height = 400
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    x = (screen_width/2) - (width/2)
+    y = (screen_height/2) - (height/2)
+    root.geometry("%dx%d+%d+%d" % (width, height, x, y))
+    root.resizable(0, 0)
+    TableMargin = Frame(root, width=320)
+    TableMargin.pack(side=TOP)
+    scrollbarx = Scrollbar(TableMargin, orient=HORIZONTAL)
+    scrollbary = Scrollbar(TableMargin, orient=VERTICAL)
+    tree = ttk.Treeview(TableMargin, columns=("Id", "Name","Date","Time"), height=400, selectmode="extended", yscrollcommand=scrollbary.set, xscrollcommand=scrollbarx.set)
+    scrollbary.config(command=tree.yview)
+    scrollbary.pack(side=RIGHT, fill=Y)
+    scrollbarx.config(command=tree.xview)
+    scrollbarx.pack(side=BOTTOM, fill=X)
+    tree.heading('Id', text="Id", anchor=W)
+    tree.heading('Name', text="Name", anchor=W)
+    tree.heading('Date', text="Date", anchor=W)
+    tree.heading('Time', text="Time", anchor=W)
+    tree.column('#0', stretch=NO, minwidth=0, width=0)
+    tree.column('#1', stretch=NO, minwidth=0, width=20)
+    tree.column('#2', stretch=NO, minwidth=0, width=100)
+    tree.column('#3', stretch=NO, minwidth=0, width=100)
+    tree.column('#4', stretch=NO, minwidth=0, width=100)
+    tree.pack()
+    
+    list_of_files = glob.glob('Attendance/*') # * means all if need specific format then *.csv
+    latest_file = max(list_of_files, key=os.path.getctime)
+    with open(r''+latest_file) as f:
+        reader = csv.DictReader(f, delimiter=',')
+        for row in reader:
+            Id = row['Id']
+            Name =row['Name']
+            Date = row['Date']
+            Time = row['Time']
+            tree.insert("", 0, values=(Id,Name,Date,Time))
+    root.mainloop()
+
+def Student():
+    root = Tk()
+    root.title("Student Details")
+    width = 200
+    height = 300
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    x = (screen_width/2) - (width/2)
+    y = (screen_height/2) - (height/2)
+    root.geometry("%dx%d+%d+%d" % (width, height, x, y))
+    root.resizable(0, 0)
+    TableMargin = Frame(root, width=400)
+    TableMargin.pack(side=TOP)
+    scrollbarx = Scrollbar(TableMargin, orient=HORIZONTAL)
+    scrollbary = Scrollbar(TableMargin, orient=VERTICAL)
+    tree = ttk.Treeview(TableMargin, columns=("Firstname", "Lastname"), height=400, selectmode="extended", yscrollcommand=scrollbary.set, xscrollcommand=scrollbarx.set)
+    scrollbary.config(command=tree.yview)
+    scrollbary.pack(side=RIGHT, fill=Y)
+    scrollbarx.config(command=tree.xview)
+    scrollbarx.pack(side=BOTTOM, fill=X)
+    tree.heading('Firstname', text="Firstname", anchor=W)
+    tree.heading('Lastname', text="Lastname", anchor=W)
+    tree.column('#0', stretch=NO, minwidth=0, width=0)
+    tree.column('#1', stretch=NO, minwidth=0, width=100)
+    tree.column('#2', stretch=NO, minwidth=0, width=100)
+    tree.pack()
+    
+    list_of_files = glob.glob('StudentDetails/*')
+    latest_file = max(list_of_files, key=os.path.getctime)
+    with open(r''+latest_file) as f:
+        reader = csv.DictReader(f, delimiter=',')
+        for row in reader:
+            Id = row['Id']
+            Name = row['Name']
+            tree.insert("", 0, values=(Id,Name))
+    root.mainloop()
 
 clearButton = tk.Button(window, text="Clear", command=clear, fg="white", bg="Blue",
-                        width=20, height=2, activebackground="white", font=('times', 15, ' bold '))
+                        width=20, height=2, activebackground="white", font=('times', 15, ' bold '),relief="raised")
 clearButton.place(x=850, y=200)
 clearButton2 = tk.Button(window, text="Clear", command=clear2, fg="white", bg="Blue",
-                         width=20, height=2, activebackground="white", font=('times', 15, ' bold '))
+                         width=20, height=2, activebackground="white", font=('times', 15, ' bold '),relief="raised")
 clearButton2.place(x=850, y=300)
 takeImg = tk.Button(window, text="Take Images", command=TakeImages, fg="white", bg="Blue",
-                    width=20, height=2, activebackground="white", font=('times', 15, ' bold '))
+                    width=20, height=2, activebackground="white", font=('times', 15, ' bold '),relief="raised")
 takeImg.place(x=180, y=500)
 trainImg = tk.Button(window, text="Train Images", command=TrainImages, fg="white",
-                     bg="Blue", width=20, height=2, activebackground="white", font=('times', 15, ' bold '))
+                     bg="Blue", width=20, height=2, activebackground="white", font=('times', 15, ' bold '),relief="raised")
 trainImg.place(x=480, y=500)
 trackImg = tk.Button(window, text="Track Images", command=TrackImages, fg="white",
-                     bg="Blue", width=20, height=2, activebackground="white", font=('times', 15, ' bold '))
+                     bg="Blue", width=20, height=2, activebackground="white", font=('times', 15, ' bold '),relief="raised")
 trackImg.place(x=780, y=500)
 quitWindow = tk.Button(window, text="Quit", command=window.destroy, fg="white", bg="Blue",
-                       width=20, height=2, activebackground="white", font=('times', 15, ' bold '))
+                       width=20, height=2, activebackground="white", font=('times', 15, ' bold '),relief="raised")
 quitWindow.place(x=1080, y=500)
+
+quitWindow = tk.Button(window, text="Attendence", command=Attendance, fg="white", bg="Blue",
+                       width=20, height=2, activebackground="white", font=('times', 15, ' bold '),relief="raised")
+quitWindow.place(x=480, y=600)
+
+quitWindow = tk.Button(window, text="Students Details", command=Student, fg="white", bg="Blue",
+                       width=20, height=2, activebackground="white", font=('times', 15, ' bold '),relief="raised")
+quitWindow.place(x=780, y=600)
+
 copyWrite = tk.Label(window, text="Created By BUIE CSE GROUP \n (Amit_Kabi,Amit_Goswami,Suman_Mandal,Tapas_Pal,Ayan_Mandal)",
                      bg="Blue", fg="white", width=100, height=2, activebackground="Blue", font=('times', 12, ' bold '))
 copyWrite.place(x=300, y=715)
